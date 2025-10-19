@@ -1,0 +1,10 @@
+{
+    "type": "split",
+    "path": "./videos",
+    "parameters": {
+        "source_file": "sample_video.mp4",
+        "output_name": "sample_segment",
+        "output_extension": "mp4",
+        "max_size": "500KB"
+    }
+}

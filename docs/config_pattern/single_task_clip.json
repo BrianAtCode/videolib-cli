@@ -1,0 +1,13 @@
+{
+    "type": "clip",
+    "path": "./videos",
+    "parameters": {
+        "source_file": "sample_video.mp4",
+        "output_name": "sample_clip",
+        "output_extension": "mp4",
+        "intervals": [
+            {"start": "0", "end": "5"},
+            {"start": "5", "end": "10"}
+        ]
+    }
+}

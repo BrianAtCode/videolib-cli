@@ -1,0 +1,13 @@
+{
+    "type": "download",
+    "path": "./videos",
+    "parameters": {
+        "is_parallel": true,
+        "output_filename": "sample_postfix",
+        "output_extension": "mp4",
+        "urls": [
+            "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4",
+            "https://sample-videos.com/zip/10/mp4/SampleVideo_1920x1080_1mb.mp4"
+        ]
+    }
+}

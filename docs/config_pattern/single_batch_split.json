@@ -1,0 +1,13 @@
+{
+    "type": "split",
+    "path": "./videos",
+    "parameters": {
+        "max_size": "2GB",
+        "output_name": "sample_segment_postfix",
+        "output_extension": "mp4",
+        "source_files": [
+            "SampleVideo_640x360_1mb.mp4",
+            "SampleVideo_1920x1080_1mb.mp4"
+        ]
+    }
+}

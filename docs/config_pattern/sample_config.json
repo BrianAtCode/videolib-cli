@@ -1,8 +1,10 @@
 {
-    "global_settings": {
+    "default_settings": {
         "output_extension": "mp4",
         "video_codec": "copy",
-        "audio_codec": "copy"
+        "audio_codec": "copy",
+        "ffmpeg_path": "",
+        "ffprobe_path": ""
     },
     "tasks": [
         {
