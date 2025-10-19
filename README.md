@@ -374,12 +374,6 @@ pytest tests/
 pip install git+https://github.com/BrianAtCode/videolib.git
 ```
 
-### Permission Denied
-
-**Error**: `PermissionError: [Errno 13] Permission denied`
-
-**Solution**: Check write permissions for output directory or run with appropriate privileges.
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
