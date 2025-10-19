@@ -359,7 +359,7 @@ pytest tests/
 
 ### FFmpeg Not Found
 
-**Error**: `FFmpeg not found in system PATH`
+**Error**: `X FFmpeg not found in system PATH`
 
 **Solution**: Install FFmpeg and add it to your system PATH:
 - Windows: Add FFmpeg bin directory to PATH environment variable
@@ -367,11 +367,20 @@ pytest tests/
 
 ### VideoLib Not Found
 
-**Error**: `ModuleNotFoundError: No module named 'videolib'`
+**Error**: `X ModuleNotFoundError: No module named 'videolib'`
 
 **Solution**: Install the VideoLib library:
 ```bash
 pip install git+https://github.com/BrianAtCode/videolib.git
+```
+
+### Program File is missing
+
+**Error**: `X FileIntegrityError: Missing required CLI files`
+
+**Solution**: remove the project directory and clone the project:
+```bash
+git clone https://github.com/BrianAtCode/videolib-cli.git
 ```
 
 ## Contributing
