@@ -2,7 +2,7 @@
 
 **Interactive Command-Line Interface for VideoLib**
 
-A user-friendly CLI application built on top of the [VideoLib](https://github.com/USERNAME/videolib) library. Process videos through an interactive menu system or batch configuration files.
+A user-friendly CLI application built on top of the [VideoLib](https://github.com/BrianAtCode/videolib) library. Process videos through an interactive menu system or batch configuration files.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)](https://www.python.org/downloads/)
@@ -19,21 +19,26 @@ A user-friendly CLI application built on top of the [VideoLib](https://github.co
 ## Screenshots
 
 ```
-╔═══════════════════════════════════════════════════════════╗
-║                   VIDEOLIB PROCESSOR                      ║
-║            Interactive Video Processing Tool              ║
-╚═══════════════════════════════════════════════════════════╝
+╔================================================================╗
+║                      VIDEOLIB PROCESSOR                        ║
+║              Interactive Video Processing Tool                 ║
+╚================================================================╝
+? Do you want to specify custom FFmpeg/FFprobe paths? [y/N]: n
+-> Video processor initialized
 
-MAIN MENU:
---------------------------------------------------
-1. Download video from URL
-2. Split video by size
-3. Create video clips
-4. Batch process from config file
-5. View FFmpeg/FFprobe info
+==================================================
+MAIN MENU
+==================================================
+1. Download Video (Enhanced monitoring)
+2. Split Video by Size
+3. Create Video Clips
+4. Get Media Information
+5. Batch Process from Config File
+6. Settings
 0. Exit
-
-> Your choice: _
+==================================================
+Tip: During operations, press 'q' to cancel and return to menu
+> Select option:_
 ```
 
 ## Installation
@@ -47,14 +52,14 @@ MAIN MENU:
 
 2. **VideoLib** library must be installed:
    ```bash
-   pip install git+https://github.com/USERNAME/videolib.git
+   pip install git+https://github.com/BrianAtCode/videolib.git
    ```
 
 ### Install VideoLib CLI
 
 ```bash
 # Clone the repository
-git clone https://github.com/USERNAME/videolib-cli.git
+git clone https://github.com/BrianAtCode/videolib-cli.git
 cd videolib-cli
 
 # Install dependencies
@@ -92,7 +97,7 @@ Create a configuration file (e.g., `tasks.json`):
   "tasks": [
     {
       "type": "download",
-      "url": "https://youtube.com/watch?v=VIDEO_ID",
+      "url": "https://sample_video.com/VIEDO_ID.mp4",
       "output_name": "my_video",
       "output_extension": "mp4"
     },
@@ -111,16 +116,14 @@ Then run batch processing through the menu (option 4).
 
 ## Features Overview
 
-### 1. Download Video from URL
-
-Download videos from YouTube and other platforms:
+### 1. Download Video from URL (Direct URL)
 
 ```
 VIDEO DOWNLOAD WORKFLOW
 --------------------------------------------------
 
 Step 1: Video URL
-> Enter video URL: https://youtube.com/watch?v=VIDEO_ID
+> Enter video URL: https://sample_video.com/VIEDO_ID.mp4
 
 Step 2: Output Settings
 > Output name: my_video
@@ -130,7 +133,7 @@ Step 3: Quality Settings
 > Video quality [best]: best
 
 Step 4: Confirmation
--> URL: https://youtube.com/watch?v=VIDEO_ID
+-> URL: https://sample_video.com/VIEDO_ID.mp4
 -> Output: my_video.mp4
 -> Quality: best
 
@@ -252,7 +255,7 @@ Step 1: Configuration File
 -> Found 3 tasks
 
 Step 2: Review Tasks
-1. Download: https://youtube.com/watch?v=VIDEO_ID
+1. Download: https://sample_video.com/VIEDO_ID.mp4
 2. Split: large_video.mp4 (target: 500MB)
 3. Clip: movie.mp4 (2 intervals)
 
@@ -330,8 +333,8 @@ To develop with a local copy of VideoLib:
 
 ```bash
 # Clone both repositories
-git clone https://github.com/USERNAME/videolib.git
-git clone https://github.com/USERNAME/videolib-cli.git
+git clone https://github.com/BrianAtCode/videolib.git
+git clone https://github.com/BrianAtCode/videolib-cli.git
 
 # Install videolib in editable mode
 cd videolib
@@ -368,7 +371,7 @@ pytest tests/
 
 **Solution**: Install the VideoLib library:
 ```bash
-pip install git+https://github.com/USERNAME/videolib.git
+pip install git+https://github.com/BrianAtCode/videolib.git
 ```
 
 ### Permission Denied
@@ -389,7 +392,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Related Projects
 
-- [VideoLib](https://github.com/USERNAME/videolib) - Core video processing library
+- [VideoLib](https://github.com/BrianAtCode/videolib) - Core video processing library
 
 ## License
 
@@ -397,12 +400,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- 📝 [Documentation](https://github.com/USERNAME/videolib-cli#readme)
-- 🐛 [Issue Tracker](https://github.com/USERNAME/videolib-cli/issues)
-- 💬 [Discussions](https://github.com/USERNAME/videolib-cli/discussions)
+- 📝 [Documentation](https://github.com/BrianAtCode/videolib-cli#readme)
+- 🐛 [Issue Tracker](https://github.com/BrianAtCode/videolib-cli/issues)
+- 💬 [Discussions](https://github.com/BrianAtCode/videolib-cli/discussions)
 
 ## Author
 
-Your Name - [@yourhandle](https://github.com/USERNAME)
+Kam ho, brian - [@BrianAtCode](https://github.com/BrianAtCode)
 
-Project Link: [https://github.com/USERNAME/videolib-cli](https://github.com/USERNAME/videolib-cli)
+Project Link: [https://github.com/BrianAtCode/videolib-cli](https://github.com/BrianAtCode/videolib-cli)
