@@ -1,0 +1,14 @@
+# VideoLib-CLI Dependencies
+# CLI application requirements
+
+# Core library (install from GitHub)
+videolib @ git+https://github.com/BrianAtCode/videolib.git
+
+# If you want to use a local videolib for development:
+# pip install -e ../videolib
+
+# Or if videolib is published to PyPI:
+# videolib>=1.0.0
+
+# Note: FFmpeg and yt-dlp are already included in videolib dependencies
+# No additional packages needed for basic CLI functionality

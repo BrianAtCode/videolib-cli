@@ -1,0 +1,101 @@
+{
+    "global_settings": {
+        "output_extension": "mp4",
+        "video_codec": "copy",
+        "audio_codec": "copy"
+    },
+    "tasks": [
+        {
+            "order": 1,
+            "type": "download",
+            "parameters": {
+                "url": "https://apn12.playlist.ttvnw.net/v1/playlist/CtIIGITVgR1BNVW36k-c4iGmFxQa4u0fSqMz6zJfI7PGCiBsLQi-lo56dArkLBaljxyq-0VD9kch85a50L97DMutemMIqcKE3mpj_vwW6mkuO81WRXUO_jpBL72DXTdMj_OSgvuCoZNQjceQT9GdKVcuL2233YVRHBYMvVUr1NA8d-AOmt0AiglfQjhgo9iN6zZPYDPDEChy2qLqkIMhg_tIJ-4FSnEMHtEtQ-ZYwyxGW2uG4nxjCDa5nhj71wohSnbIO2hBxvWs3F87F7L5ZDExHL1E0CJbCXBeaxCtWVekC_JDtL4xWbkHETkEwNhMvztqYqZHvrdBt6Q4qoeUNWuhyVhfVfadeKQDNcSl88GK5RWmeK_6Cqcs1xHj_MjhrDxPuynpPuLZuGvM6MTvCxv1PTjwvvOcZ3u5syO2IyM5bx8qQjBaTsqcF8Odfcotov7Rthf7wJHtj5BtJc6cWGsEXZsTB4BQ9v1Go4ZZrRqNV2wCJdTZGKgDg1SYvpe5JrN7YD6JaScVVUB9yanTA4tTEm-L7h8VcUSPtiFi9iFTWZJMp7z57pDfxyt54t7U8OOXw-t-jnzkzsNT_UomSSzC0rojolMe2dkLl7MDfxyUhGfOnQ_uxEXwLq-rbeVcaNwL86weS6NSPVCs34x63ZQL-mtXcHeNHTSHSbjprh1WO8W0SBZojkXwjcGdfH9hw6VmJehXicFTCOuopDc1AkpBtqsbhSSBem-5R8c4Faasq8EvJg2SwqnEKwG1FDAXXSeEXY6saHIu3XzBDtG5foLzUenlEQwjCtJoZUNEknJEfg2TVSOQazykEirei-sWeFEPc5rDlBtw0x08kiiy_V1bE-7wF63_SGYlK0T7wS1DzalkstB0CosnG4V2W2nsbqoop43uL0XVT5xj5yMjYiRSKSfJahlbmmnq0oMZ8pMVtrl6afZMa2C1IMEn7rGVTCmjD85A42oWuV_Opbrtrl4_MbqcisSzaLNGFbugATkmG04VzDkCksT3mNoSF3rD_hlxOMC7tF14eWuwLDrkoyM8XAOTfj9GanBQkmYZqzdaPqeJ-RBQjUA-QUMqpII0u7ECKJsYvVt1MlQ9RoIk6u1O-OWPqGEs8VZ5Nd5lMSI-2QQ-SbafV9uCZkAnbNm9hDRUbbRGjf8RkASK7i4ReUfL5T4HqEl-J27QrRBCUqODTGogiDIEdKUXT9OgY6S1kho1KEXLFqWo6PrfBT91w5kPV2LAD4_TICGns_mYp1V4SxPLxlcjh8C5TPguwfecI5dVvP_Rs1qgpXYoKz_KyRAdWU13QGSRc3hBqTkKL6gRQAkODncw6LNPYc5M9Ip1hkzTWrZTYQ-XZuteXIuG9MAtIkP-w-voLDJdFig0Y7US3c3KlB3ISK93cW5-oS6ZXVGBYaBrmuz-CMf_c_9fE5L5Kb0R1GOeaLHmI74_CnR2Mspdu3t2XbvzbcU6oe10lfGDxqAaDLUOBFM1UXHFGQ-7uCABKgl1cy13ZXN0LTIwtg0.m3u8",
+                "output_filename": "sample_video.mp4"
+            }
+        },
+        {
+            "order": 2,
+            "type": "split",
+            "parameters": {
+                "source_file": "sample_video.mp4",
+                "output_name": "sample_segment",
+                "output_extension": "mp4",
+                "max_size": "500KB"
+            }
+        },
+        {
+            "order": 3,
+            "type": "clip",
+            "parameters": {
+                "source_file": "sample_video.mp4",
+                "output_name": "sample_clip",
+                "output_extension": "mp4",
+                "intervals": [
+                    {"start": "0", "end": "5"},
+                    {"start": "5", "end": "10"}
+                ]
+            }
+        }
+    ],
+    "batch_tasks":[
+        {
+            "type": "download",
+            "task_path, ": "./videos",
+            "is_parallel": true,
+            "tasks":[
+                {
+                    "url": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+                    "output_filename": "sample_video_1.mp4"
+                },
+                {
+                    "url": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4",
+                    "output_filename": "sample_video_2.mp4"
+                }
+            ]
+        },       
+        { 
+            "type": "split",
+            "task_path, ": "./videos",
+            "is_parallel": false,
+            "tasks":[
+                {
+                    "source_file": "sample_video_1.mp4",
+                    "output_name": "sample_segment_1",
+                    "output_extension": "mp4",
+                    "max_size": "500KB"
+                },
+                {
+                    "source_file": "sample_video_2.mp4",
+                    "output_name": "sample_segment_2",
+                    "output_extension": "mp4",
+                    "max_size": "1MB"
+                }
+            ]
+        },
+        {
+            "type":"clip", 
+            "task_path, ": "./videos",
+            "is_parallel": false,
+            "tasks":[
+                {
+                    "source_file": "sample_video_1.mp4",
+                    "output_name": "sample_clip_1",
+                    "output_extension": "mp4",
+                    "intervals": [
+                        {"start": "0", "end": "5"},
+                        {"start": "5", "end": "10"}
+                    ]
+                },
+                {
+                    "source_file": "sample_video_2.mp4",
+                    "output_name": "sample_clip_2",
+                    "output_extension": "mp4",
+                    "intervals": [
+                        {"start": "10", "end": "15"},
+                        {"start": "15", "end": "20"}
+                    ]
+                }
+            ]
+        }
+    ]
+}
