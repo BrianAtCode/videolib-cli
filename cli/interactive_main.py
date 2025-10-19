@@ -249,9 +249,6 @@ class InteractiveCLI:
         """Initialize video processor with custom FFmpeg paths if needed"""
         if self.processor is not None:
             return
-            
-        print("VideoLib - Interactive Video Processing Tool (Enhanced with 'q' interrupt)")
-        print("=" * 70)
         
         # Check for custom FFmpeg paths
         use_custom = self.get_yes_no("Do you want to specify custom FFmpeg/FFprobe paths?", False)
