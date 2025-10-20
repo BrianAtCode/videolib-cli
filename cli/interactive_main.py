@@ -366,7 +366,7 @@ class InteractiveCLI:
         
         # Try to show meaningful part
         name = path_obj.name
-        if len(name) <= max_length - 4:  # Leave room for ".../"
+        if len(name) <= max_length - 4:  # Leave room for ".../ "
             return f".../{name}"
         else:
             return f".../{name[:max_length-7]}..."
@@ -714,7 +714,7 @@ class InteractiveCLI:
                     safety_factor=safety_factor,
                     max_rounds=max_rounds
                 )
-                print(options)
+                
                 # Execute split
                 result = self.processor.splitter.split_by_size(options)
                 
@@ -728,53 +728,12 @@ class InteractiveCLI:
                 print("-> Note: Partial output files may have been created")
                 return
             
-            # Display results
+            # Display results using the improved __str__ method
             print("\n" + "=" * 50)
             print("VIDEO SPLIT RESULTS")
             print("=" * 50)
+            print(result)  # This now uses the custom __str__ method
             
-            if result.success:
-                print(result)
-                print(f"-> Successfully split video into {len(result.output_files)} segment(s)")
-                
-                if result.was_copied:
-                    print("-> Note: File was already smaller than target size and was copied")
-                
-                # Show output files
-                print("\n-> Output segments:")
-                total_size = 0
-                for i, output_file in enumerate(result.output_files, 1):
-                    file_size = videolib.FileManager.get_file_size(output_file)
-                    if file_size:
-                        size_str = videolib.FormatParser.format_file_size(file_size)
-                        total_size += file_size
-                        
-                        # Check if oversized
-                        if file_size > target_size_bytes:
-                            status = "[OVERSIZED]"
-                        else:
-                            status = ""
-                        
-                        print(f"   {i}. {os.path.basename(output_file)} ({size_str}) {status}")
-                    else:
-                        print(f"   {i}. {os.path.basename(output_file)} (Size unknown)")
-                
-                # Show total size
-                if total_size > 0:
-                    print(f"\n-> Total output size: {videolib.FormatParser.format_file_size(total_size)}")
-                
-                # Show oversized files warning
-                if result.oversized_files:
-                    print(f"\n-> Warning: {len(result.oversized_files)} file(s) exceeded target size:")
-                    for oversized in result.oversized_files:
-                        file_size = videolib.FileManager.get_file_size(oversized)
-                        size_str = videolib.FormatParser.format_file_size(file_size) if file_size else "Unknown"
-                        print(f"   - {os.path.basename(oversized)} ({size_str})")
-                    print("-> Consider using a smaller target size or higher safety factor")
-            
-            else:
-                print(f"X Split failed: {result.error_message}")
-
         except KeyboardInterrupt:
             print("\n-> Split cancelled by user")
         except Exception as e:
