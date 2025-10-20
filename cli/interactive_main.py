@@ -732,7 +732,6 @@ class InteractiveCLI:
             print("\n" + "=" * 50)
             print("VIDEO SPLIT RESULTS")
             print("=" * 50)
-            print(result)  # This now uses the custom __str__ method
             
             if result.success:
                 print(f"-> Successfully split video into {len(result.output_files)} segment(s)")
