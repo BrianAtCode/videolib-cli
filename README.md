@@ -152,37 +152,64 @@ Step 4: Confirmation
 Split large videos into smaller segments:
 
 ```
+--------------------------------------------------
 VIDEO SPLIT WORKFLOW
 --------------------------------------------------
 
 Step 1: Source Video
-> Enter source video file path: large_video.mp4
+--------------------
+> Enter source video file path: .\sample_video.mp4
 
 -> Analyzing video...
--> Duration: 01:30:45
--> Current size: 2.1 GB
+-> Press 'q' to cancel analysis
+[-------------------------]   0% Analyzing video file... | Press 'q' to cancel
+-> Duration: 00:47:16
+-> Current size: 3.3 GB
+-> Video codec: h264
+-> Audio codec: aac
 
 Step 2: Target Size
-> Enter target size per segment: 500MB
-
--> Estimated segments: 5 segments
+--------------------
+> Enter target size per segment (e.g. 500MB, 1GB): 2GB
+-> Estimated segments: ~2 segments
 
 Step 3: Output Settings
-> Output name prefix: segment
-> Output extension [mp4]: mp4
+-------------------------
+> Output name prefix (without extension) [sample_video_segment]:
+> Output file extension [mp4]:
 
-Step 4: Confirmation
-? Proceed with splitting? [Y/n]: y
+Step 4: Advanced Settings (Optional)
+-----------------------------------
+? Configure advanced settings? [y/N]: y
 
--> Splitting into 5 segments...
-[████████████████████] 100% Processing... | Press 'q' to cancel
+Step 5: Confirmation
+--------------------
+-> Source: .\sample_video.mp4
+-> Target size: 2.0 GB
+-> Output prefix: sample_video_segment
+-> Output extension: mp4
+-> Estimated segments: ~2
+-> Safety factor: 0.95
+-> Max split rounds: 4
+? Proceed with video split? [Y/n]: y
 
-✓ Successfully created 5 segments:
-   1. segment_001.mp4 (500.0 MB)
-   2. segment_002.mp4 (500.0 MB)
-   3. segment_003.mp4 (500.0 MB)
-   4. segment_004.mp4 (500.0 MB)
-   5. segment_005.mp4 (120.0 MB)
+-> Starting video split...
+-> Press 'q' anytime during processing to cancel and return to menu
+--------------------------------------------------
+[-------------------------]   0% Splitting video... | Press 'q' to cancel
+
+==================================================
+VIDEO SPLIT RESULTS
+==================================================
+-> Successfully split video into 2 segment(s)     
+
+-> Output segments:
+   1. sample_video_segment_000.mp4 (1.9 GB)
+   2. sample_video_segment_001.mp4 (1.4 GB)
+
+-> Total output size: 3.3 GB
+
+-> Press Enter to continue...
 ```
 
 ### 3. Create Video Clips
@@ -299,7 +326,7 @@ videolib-cli/
 ├── docs/                    # Documentation
 │   ├── FILE_STRUCTURE.md
 │   ├── sample_config.json
-│   └── USAGE.md
+│   └── Config_USAGE.md
 ├── run_simple.py            # Simple launcher
 ├── run_videolib.bat         # Windows batch launcher
 ├── requirements.txt         # Dependencies
