@@ -714,7 +714,6 @@ class InteractiveCLI:
                     safety_factor=safety_factor,
                     max_rounds=max_rounds
                 )
-                print(options)
                 # Execute split
                 result = self.processor.splitter.split_by_size(options)
                 
@@ -734,7 +733,6 @@ class InteractiveCLI:
             print("=" * 50)
             
             if result.success:
-                print(result)
                 print(f"-> Successfully split video into {len(result.output_files)} segment(s)")
                 
                 if result.was_copied:
