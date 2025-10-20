@@ -366,7 +366,7 @@ class InteractiveCLI:
         
         # Try to show meaningful part
         name = path_obj.name
-        if len(name) <= max_length - 4:  # Leave room for ".../"
+        if len(name) <= max_length - 4:  # Leave room for ".../ "
             return f".../{name}"
         else:
             return f".../{name[:max_length-7]}..."
@@ -714,6 +714,7 @@ class InteractiveCLI:
                     safety_factor=safety_factor,
                     max_rounds=max_rounds
                 )
+                
                 # Execute split
                 result = self.processor.splitter.split_by_size(options)
                 
@@ -727,10 +728,11 @@ class InteractiveCLI:
                 print("-> Note: Partial output files may have been created")
                 return
             
-            # Display results
+            # Display results using the improved __str__ method
             print("\n" + "=" * 50)
             print("VIDEO SPLIT RESULTS")
             print("=" * 50)
+            print(result)  # This now uses the custom __str__ method
             
             if result.success:
                 print(f"-> Successfully split video into {len(result.output_files)} segment(s)")
