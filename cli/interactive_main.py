@@ -576,9 +576,10 @@ class InteractiveCLI:
             print("\nStep 1: Source Video")
             print("-" * 20)
             source_file = self.get_file_path("Enter source video file path", must_exist=True)
-            
+
             # Get media info with progress
             print("\n-> Analyzing video...")
+            print("-> Press 'q' to cancel analysis")
             self.keyboard_listener.start_listening()
             self.progress_tracker.start("Analyzing video file...")
             
@@ -588,6 +589,11 @@ class InteractiveCLI:
                 self.progress_tracker.stop()
                 self.keyboard_listener.stop_listening()
             
+            # Check for user interrupt
+            if self.keyboard_listener.should_quit:
+                print("\n-> Analysis cancelled by user ('q' pressed)")
+                return
+        
             if media_info:
                 duration = videolib.FormatParser.format_duration(media_info.duration) if media_info.duration else "Unknown"
                 file_size = videolib.FormatParser.format_file_size(media_info.size_bytes) if media_info.size_bytes else "Unknown"
@@ -595,10 +601,180 @@ class InteractiveCLI:
                 print(f"-> Current size: {file_size}")
                 if media_info.video_codec:
                     print(f"-> Video codec: {media_info.video_codec}")
+                if media_info.audio_codec:
+                    print(f"-> Audio codec: {media_info.audio_codec}")
+        
+            # Step 2: Get target size
+            print("\nStep 2: Target Size")
+            print("-" * 20)
+            target_size_str = self.get_input("Enter target size per segment (e.g. 500MB, 1GB)")
             
-            # Continue with split settings (same as before but with interrupt support)
-            # ... [rest of the split logic with keyboard listener integration]
+            # Parse target size
+            try:
+                target_size_bytes = videolib.FormatParser.parse_size(target_size_str)
+            except Exception as e:
+                print(f"X Invalid size format: {e}")
+                print("-> Examples: 500MB, 1GB, 1024KB")
+                return
             
+            # Validate target size
+            if media_info and media_info.size_bytes:
+                if target_size_bytes >= media_info.size_bytes:
+                    print(f"-> Note: Target size ({videolib.FormatParser.format_file_size(target_size_bytes)}) "
+                        f"is larger than source ({file_size})")
+                    proceed = self.get_yes_no("File is already smaller than target. Continue anyway?", False)
+                    if not proceed:
+                        print("X Split cancelled")
+                        return
+                else:
+                    # Estimate number of segments
+                    estimated_segments = int((media_info.size_bytes / target_size_bytes) + 0.5)
+                    print(f"-> Estimated segments: ~{estimated_segments} segments")
+            
+            # Step 3: Output settings
+            print("\nStep 3: Output Settings")
+            print("-" * 25)
+            
+            # Suggest output name from source file
+            suggested_name = os.path.splitext(os.path.basename(source_file))[0] + "_segment"
+            output_name = self.get_input("Output name prefix (without extension)", suggested_name)
+            
+            # Get output extension (default to source extension)
+            suggested_ext = os.path.splitext(source_file)[1][1:] if os.path.splitext(source_file)[1] else "mp4"
+            output_extension = self.get_input("Output file extension", suggested_ext)
+            
+            # Normalize extension
+            output_extension = videolib.FormatParser.normalize_extension(output_extension)
+            
+            # Step 4: Advanced settings (optional)
+            print("\nStep 4: Advanced Settings (Optional)")
+            print("-" * 35)
+            use_advanced = self.get_yes_no("Configure advanced settings?", False)
+            
+            if use_advanced:
+                safety_factor_str = self.get_input("Safety factor (0.8-0.99, lower = smaller segments)", "0.95")
+                try:
+                    safety_factor = float(safety_factor_str)
+                    if not 0.5 <= safety_factor <= 0.99:
+                        print("X Safety factor must be between 0.5 and 0.99, using default 0.95")
+                        safety_factor = 0.95
+                except ValueError:
+                    print("X Invalid safety factor, using default 0.95")
+                    safety_factor = 0.95
+                
+                max_rounds_str = self.get_input("Max split rounds for oversized segments (1-10)", "4")
+                try:
+                    max_rounds = int(max_rounds_str)
+                    if not 1 <= max_rounds <= 10:
+                        print("X Max rounds must be between 1 and 10, using default 4")
+                        max_rounds = 4
+                except ValueError:
+                    print("X Invalid max rounds, using default 4")
+                    max_rounds = 4
+            else:
+                safety_factor = 0.95
+                max_rounds = 4
+            
+            # Step 5: Confirmation
+            print("\nStep 5: Confirmation")
+            print("-" * 20)
+            print(f"-> Source: {self.truncate_path(source_file)}")
+            print(f"-> Target size: {videolib.FormatParser.format_file_size(target_size_bytes)}")
+            print(f"-> Output prefix: {output_name}")
+            print(f"-> Output extension: {output_extension}")
+            if media_info and media_info.size_bytes:
+                estimated_segments = int((media_info.size_bytes / target_size_bytes) + 0.5)
+                print(f"-> Estimated segments: ~{estimated_segments}")
+            print(f"-> Safety factor: {safety_factor}")
+            print(f"-> Max split rounds: {max_rounds}")
+            
+            confirm = self.get_yes_no("Proceed with video split?", True)
+            if not confirm:
+                print("X Split cancelled")
+                return
+            
+            # Step 6: Execute split with interrupt support
+            print("\n-> Starting video split...")
+            print("-> Press 'q' anytime during processing to cancel and return to menu")
+            print("-" * 50)
+            
+            # Start keyboard listener
+            self.keyboard_listener.start_listening()
+            self.progress_tracker.start("Splitting video...")
+            
+            try:
+                # Use VideoSplitter from processor
+                from videolib.core.splitter import SplitOptions
+                
+                options = SplitOptions(
+                    source_file=source_file,
+                    output_name=output_name,
+                    output_extension=output_extension,
+                    max_size_bytes=target_size_bytes,
+                    safety_factor=safety_factor,
+                    max_rounds=max_rounds
+                )
+                print(options)
+                # Execute split
+                result = self.processor.splitter.split_by_size(options)
+                
+            finally:
+                self.progress_tracker.stop()
+                self.keyboard_listener.stop_listening()
+            
+            # Check for user interrupt
+            if self.keyboard_listener.should_quit:
+                print("\n-> Split cancelled by user ('q' pressed)")
+                print("-> Note: Partial output files may have been created")
+                return
+            
+            # Display results
+            print("\n" + "=" * 50)
+            print("VIDEO SPLIT RESULTS")
+            print("=" * 50)
+            
+            if result.success:
+                print(result)
+                print(f"-> Successfully split video into {len(result.output_files)} segment(s)")
+                
+                if result.was_copied:
+                    print("-> Note: File was already smaller than target size and was copied")
+                
+                # Show output files
+                print("\n-> Output segments:")
+                total_size = 0
+                for i, output_file in enumerate(result.output_files, 1):
+                    file_size = videolib.FileManager.get_file_size(output_file)
+                    if file_size:
+                        size_str = videolib.FormatParser.format_file_size(file_size)
+                        total_size += file_size
+                        
+                        # Check if oversized
+                        if file_size > target_size_bytes:
+                            status = "[OVERSIZED]"
+                        else:
+                            status = ""
+                        
+                        print(f"   {i}. {os.path.basename(output_file)} ({size_str}) {status}")
+                    else:
+                        print(f"   {i}. {os.path.basename(output_file)} (Size unknown)")
+                
+                # Show total size
+                if total_size > 0:
+                    print(f"\n-> Total output size: {videolib.FormatParser.format_file_size(total_size)}")
+                
+                # Show oversized files warning
+                if result.oversized_files:
+                    print(f"\n-> Warning: {len(result.oversized_files)} file(s) exceeded target size:")
+                    for oversized in result.oversized_files:
+                        file_size = videolib.FileManager.get_file_size(oversized)
+                        size_str = videolib.FormatParser.format_file_size(file_size) if file_size else "Unknown"
+                        print(f"   - {os.path.basename(oversized)} ({size_str})")
+                    print("-> Consider using a smaller target size or higher safety factor")
+            
+            else:
+                print(f"X Split failed: {result.error_message}")
+
         except KeyboardInterrupt:
             print("\n-> Split cancelled by user")
         except Exception as e:
