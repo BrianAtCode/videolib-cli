@@ -185,6 +185,7 @@ desktop.ini
 temp/
 tmp/
 *.tmp
+videolib/
 
 # Documentation builds
 docs/_build/
