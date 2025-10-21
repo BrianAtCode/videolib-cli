@@ -73,6 +73,20 @@
                     "SampleVideo_1920x1080_1mb.mp4"
                 ]
             }
-        }
+        },
+        {
+            "order": 6,
+            "type": "gif",
+            "parameters": {
+                "source_file": "sample_video.mp4",
+                "output_name": "sample_gif",
+                "num_clips": 5,
+                "clip_duration": 3.0,
+                "fps": 10,
+                "scale_width": 320,
+                "quality_level": "medium",
+                "create_thumbnails": true
+            }
+        }   
     ]
 }

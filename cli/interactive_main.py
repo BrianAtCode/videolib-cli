@@ -11,7 +11,7 @@ import subprocess
 import select
 from pathlib import Path
 from typing import Optional, List, Dict, Any
-
+from .gif_commands import GifCommands
 # Import the video processing library
 try:
     import videolib
@@ -244,6 +244,7 @@ class InteractiveCLI:
         self.keyboard_listener = KeyboardListener()
         self.progress_tracker = ProgressTracker(self.keyboard_listener)
         self.ffmpeg_monitor = FFmpegMonitor(self.keyboard_listener)
+        self.gif_commands = GifCommands()
         
     def initialize_processor(self):
         """Initialize video processor with custom FFmpeg paths if needed"""
@@ -284,9 +285,10 @@ class InteractiveCLI:
         print("1. Download Video (Enhanced monitoring)")
         print("2. Split Video by Size") 
         print("3. Create Video Clips")
-        print("4. Get Media Information")
-        print("5. Batch Process from Config File")
-        print("6. Settings")
+        print("4. Create Animated GIFs")
+        print("5. Get Media Information")
+        print("6. Batch Process from Config File")
+        print("7. Settings")
         print("0. Exit")
         print("=" * 50)
         print("Tip: During operations, press 'q' to cancel and return to menu")
@@ -1299,10 +1301,12 @@ class InteractiveCLI:
                     elif choice == '3':
                         self.create_clips_interactive()
                     elif choice == '4':
-                        self.get_media_info_interactive()
+                        self.gif_commands.create_gif_clips_interactive()
                     elif choice == '5':
-                        self.batch_process_interactive()
+                        self.get_media_info_interactive()
                     elif choice == '6':
+                        self.batch_process_interactive()
+                    elif choice == '7':
                         self.settings_menu()
                     else:
                         print("X Invalid option. Please try again.")
