@@ -139,6 +139,9 @@ class GifCommands:
         scale_width = self._get_scale_setting()
         quality_level = self._get_quality_setting()
 
+        #Get final GIF resolution
+        final_gif_width, final_gif_height = self._get_final_gif_resolution_setting(source_file)
+
         # Enhanced options
         create_thumbnails = self.ui.confirm_action("Create thumbnail images?", default=True)
         create_grid = self.ui.confirm_action("Create thumbnail grid with media info?", default=True)
@@ -174,6 +177,8 @@ class GifCommands:
         print(f"-> GIF duration: {Colors.colorize(f'{gif_duration}s', Colors.GREEN)}")
         print(f"-> Time gap: {Colors.colorize(f'{time_gap}s', Colors.GREEN)}")
         print(f"-> Output prefix: {Colors.colorize(output_name, Colors.CYAN)}")
+        print(f"-> Individual clips: {Colors.colorize(f'{scale_width}px width', Colors.BLUE)}")
+        print(f"-> Final GIF resolution: {Colors.colorize(f'{final_gif_width}x{final_gif_height}', Colors.BLUE)}")
         print(f"-> FPS: {Colors.colorize(str(fps), Colors.BLUE)}")
         print(f"-> Scale width: {Colors.colorize(f'{scale_width}px', Colors.BLUE)}")
         print(f"-> Quality: {Colors.colorize(quality_level, Colors.BLUE)}")
@@ -225,7 +230,9 @@ class GifCommands:
                 create_thumbnails=create_thumbnails,
                 create_grid=create_grid,
                 merge_gifs=merge_gifs,
-                cleanup_individual_thumbs=cleanup_individual_thumbs
+                cleanup_individual_thumbs=cleanup_individual_thumbs,
+                final_gif_width=final_gif_width,    
+                final_gif_height=final_gif_height
             )
 
             self.progress.finish("GIF creation completed!")
@@ -337,6 +344,68 @@ class GifCommands:
                 return "high"
             else:
                 self.ui.print_error("Please enter 1, 2, or 3")
+
+    def _get_final_gif_resolution_setting(self, source_file: str) -> Tuple[int, int]:
+        """Get final GIF resolution setting from user"""
+        print()
+        self.ui.print_step("Final GIF Resolution Settings")
+        print("This controls the resolution of the final merged GIF (not individual clips)")
+        
+        # Get source video resolution for reference
+        media_info = self.processor.get_media_info(source_file)
+        if media_info:
+            source_res = f"{media_info.width}x{media_info.height}"
+            print(f"-> Source video resolution: {Colors.colorize(source_res, Colors.CYAN)}")
+        
+        print()
+        print("Resolution options:")
+        print("1. 480p  (854x480)   - Small file size")
+        print("2. 720p  (1280x720)  - Good balance") 
+        print("3. 1080p (1920x1080) - High quality")
+        print("4. Custom resolution")
+        print("5. Auto (fit source within 1920x1080)")
+        print()
+        
+        while True:
+            choice = self.ui.get_input("Select final GIF resolution (1-5)", "5")
+            
+            if choice == "1":
+                return 854, 480
+            elif choice == "2":
+                return 1280, 720
+            elif choice == "3":
+                return 1920, 1080
+            elif choice == "4":
+                # Custom resolution input
+                while True:
+                    try:
+                        width_input = self.ui.get_input("Enter width in pixels")
+                        width = int(width_input)
+                        if width < 100 or width > 4096:
+                            self.ui.print_error("Width must be between 100 and 4096 pixels")
+                            continue
+                        
+                        height_choice = self.ui.get_input("Enter height (or press Enter for auto)", "")
+                        if height_choice:
+                            height = int(height_choice)
+                            if height < 100 or height > 4096:
+                                self.ui.print_error("Height must be between 100 and 4096 pixels")
+                                continue
+                        else:
+                            height = 0  # Auto-calculate
+                        
+                        return width, height
+                        
+                    except ValueError:
+                        self.ui.print_error("Please enter valid numbers")
+            elif choice == "5":
+                # Auto-fit within 1920x1080
+                converter = self.processor.gif_converter
+                width, height = converter._get_optimal_final_resolution(source_file, 1920, 1080)
+                print(f"-> Auto-calculated: {Colors.colorize(f'{width}x{height}', Colors.GREEN)}")
+                return width, height
+            else:
+                self.ui.print_error("Please enter 1, 2, 3, 4, or 5")
 
     def _finalize_gif_creation(self, source_file: str, intervals: List[Tuple[float, float]]):
         """Finalize and execute GIF creation"""
@@ -563,10 +632,15 @@ class GifCommands:
             gif_duration = 3.0
             time_gap = max(0, (total_duration - 90) / 29) if 30 > 1 else 0
             quality_desc = "Long video: 3s clips"
+
+        # Calculate and show final resolution
+        converter = self.processor.gif_converter
+        final_width, final_height = converter._get_optimal_final_resolution(source_file, 1440, 1080)
         
         print(f"-> Auto Settings: {Colors.colorize(quality_desc, Colors.BLUE)}")
         print(f"-> Clip Duration: {Colors.colorize(f'{gif_duration}s', Colors.BLUE)}")
         print(f"-> Time Gap: {Colors.colorize(f'{time_gap:.1f}s', Colors.BLUE)}")
+        print(f"-> Final GIF Resolution: {Colors.colorize(f'{final_width}x{final_height} (max 1440x1080)', Colors.BLUE)}")
         print(f"-> Output Quality: {Colors.colorize('Medium (480p, 12fps)', Colors.BLUE)}")
         print()
         
