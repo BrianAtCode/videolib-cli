@@ -482,3 +482,170 @@ class GifCommands:
             return self.ui.format_duration(seconds)
         except:
             return duration_str
+        
+    def _choose_gif_method(self) -> str:
+        """Choose GIF creation method"""
+        self.ui.print_step("Step 2: GIF Creation Method")
+
+        print("1. Auto-generate clips (NEW: video-clips-first approach)")
+        print("2. Manual time intervals (traditional GIF approach)")
+        print("3. One-click video to GIF (automatic optimal settings)")  # ✅ NEW OPTION
+        print()
+
+        while True:
+            choice = self.ui.get_input("Select method (1, 2, 3)")
+            if choice in ["1", "2", "3"]:
+                return choice
+            self.ui.print_error("Please enter 1, 2, or 3")
+
+    def create_gif_clips_interactive(self):
+        """Interactive GIF creation workflow"""
+        try:
+            self.ui.print_header("VIDEO TO GIF CONVERSION WORKFLOW")
+
+            # Step 1: Get source video
+            source_file = self._get_source_video()
+            if not source_file:
+                return
+
+            # Get video info
+            self.ui.print_info("Analyzing video file...")
+            media_info = self.processor.get_media_info(source_file)
+            if not media_info:
+                self.ui.print_error("Could not analyze video file")
+                return
+
+            self._display_video_info(media_info)
+
+            # Step 2: Choose GIF creation method
+            method = self._choose_gif_method()
+
+            if method == "1":  # Auto-generate clips (NEW video-first workflow)
+                self._auto_generate_clips_video_first(source_file, media_info.duration)
+            elif method == "2":  # Manual intervals (traditional workflow)
+                self._manual_intervals_traditional(source_file, media_info.duration)
+            elif method == "3":  # One-click conversion
+                self._one_click_video_to_gif(source_file, media_info.duration)
+
+        except KeyboardInterrupt:
+            self.ui.print_info("\\n-> GIF creation cancelled by user")
+        except Exception as e:
+            self.ui.print_error(f"Error during GIF creation: {e}")
+
+    def _one_click_video_to_gif(self, source_file: str, total_duration: float):
+        """One-click video to GIF conversion with automatic settings"""
+        self.ui.print_step("Step 3: One-Click Video to GIF")
+        
+        print("🎯 One-Click Conversion Features:")
+        print("   • Automatically creates 30 optimized clips")
+        print("   • Smart duration and gap calculation")
+        print("   • Optimal quality and resolution settings")
+        print("   • Creates thumbnail grid with timestamps")
+        print("   • Cleans up individual files automatically")
+        print("   • Single merged GIF output")
+        print()
+        
+        # Show automatic settings preview
+        duration_str = self.ui.format_duration(total_duration)
+        print(f"-> Source Video Duration: {Colors.colorize(duration_str, Colors.GREEN)}")
+        print(f"-> Target Clips: {Colors.colorize('30 clips', Colors.CYAN)}")
+        
+        # Calculate preview settings (same logic as in converter)
+        if total_duration <= 30:
+            gif_duration = 1.0
+            time_gap = max(0, (total_duration - 30) / 29) if 30 > 1 else 0
+            quality_desc = "Short video: 1s clips"
+        elif total_duration <= 300:
+            gif_duration = 2.0
+            time_gap = max(0, (total_duration - 60) / 29) if 30 > 1 else 0
+            quality_desc = "Medium video: 2s clips"
+        else:
+            gif_duration = 3.0
+            time_gap = max(0, (total_duration - 90) / 29) if 30 > 1 else 0
+            quality_desc = "Long video: 3s clips"
+        
+        print(f"-> Auto Settings: {Colors.colorize(quality_desc, Colors.BLUE)}")
+        print(f"-> Clip Duration: {Colors.colorize(f'{gif_duration}s', Colors.BLUE)}")
+        print(f"-> Time Gap: {Colors.colorize(f'{time_gap:.1f}s', Colors.BLUE)}")
+        print(f"-> Output Quality: {Colors.colorize('Medium (480p, 12fps)', Colors.BLUE)}")
+        print()
+        
+        # Simple output name input - only user input required
+        output_name = self.ui.get_input("Output name prefix", "oneclick")
+        
+        # Minimal confirmation
+        self.ui.print_step("Step 4: One-Click Confirmation")
+        print(f"-> Source: {Colors.colorize(source_file, Colors.YELLOW)}")
+        print(f"-> Output: {Colors.colorize(f'{output_name}_final.gif + {output_name}_grid.png', Colors.GREEN)}")
+        print(f"-> Processing: {Colors.colorize('Fully automatic (no further input needed)', Colors.CYAN)}")
+        print()
+        
+        if not self.ui.confirm_action("Start one-click GIF creation?"):
+            return
+
+        # Execute one-click conversion
+        self.ui.print_info("🚀 Starting one-click GIF creation...")
+        self.ui.print_info("All settings are automatic - please wait for completion")
+
+        # Start progress tracking
+        self.progress.start(6, "One-click GIF creation...")
+
+        try:
+            result = self.processor.create_one_click_gif(source_file, output_name)
+
+            self.progress.finish("One-click GIF creation completed!")
+            self._display_one_click_results(result)
+
+        except Exception as e:
+            self.progress.finish("One-click GIF creation failed!")
+            self.ui.print_error(f"Error during one-click GIF creation: {e}")
+
+    def _display_one_click_results(self, result):
+        """Display one-click conversion results"""
+        if result.success:
+            self.ui.print_header("ONE-CLICK GIF CREATION RESULTS")
+            
+            # Show media info if available
+            if result.media_info:
+                print("-> Source Video Information:")
+                info = result.media_info
+                print(f"   Format: {Colors.colorize(info.get('format', 'Unknown'), Colors.CYAN)}")
+                print(f"   Duration: {Colors.colorize(self._format_duration_from_str(info.get('duration', '0')), Colors.CYAN)}")
+                resolution_str = f"{info.get('width', '0')}x{info.get('height', '0')}"
+                print(f"   Resolution: {Colors.colorize(resolution_str, Colors.CYAN)}")
+                print()
+            
+            self.ui.print_success("🎯 One-click conversion completed successfully!")
+            print()
+
+            # Display final outputs (should be minimal due to cleanup)
+            if result.gif_files:
+                print("-> Final GIF Output:")
+                gif_file = result.gif_files[0]  # Should be the merged GIF
+                size = self.ui.get_file_size(gif_file) if os.path.exists(gif_file) else 0
+                size_str = self.ui.format_file_size(size)
+                print(f"   {Colors.colorize(gif_file, Colors.YELLOW)} ({Colors.colorize(size_str, Colors.BLUE)})")
+
+            # Display grid (should be the only thumbnail file left)
+            grid_thumbs = [f for f in result.thumbnail_files if f.endswith('_grid.png')]
+            if grid_thumbs:
+                print("\n-> Thumbnail Grid:")
+                for thumb_file in grid_thumbs:
+                    size = self.ui.get_file_size(thumb_file) if os.path.exists(thumb_file) else 0
+                    size_str = self.ui.format_file_size(size)
+                    print(f"   {Colors.colorize(thumb_file, Colors.MAGENTA)} ({Colors.colorize(size_str, Colors.BLUE)})")
+
+            print()
+            print(f"-> Processing Summary:")
+            print(f"   Clips Processed: {Colors.colorize('30 video clips', Colors.GREEN)}")
+            print(f"   Total Duration: {Colors.colorize(self.ui.format_duration(result.total_duration), Colors.YELLOW)}")
+            print(f"   Processing Time: {Colors.colorize(f'{result.processing_time:.1f}s', Colors.YELLOW)}")
+            print(f"   Output Files: {Colors.colorize('2 files (GIF + Grid)', Colors.CYAN)}")
+            print(f"   Workflow: {Colors.colorize('One-click automatic', Colors.GREEN)}")
+
+        else:
+            self.ui.print_error("One-click GIF creation failed")
+            if result.error_message:
+                print(f"Error: {Colors.colorize(result.error_message, Colors.RED)}")
+
+        self.ui.wait_for_enter()
