@@ -521,9 +521,9 @@ class GifCommands:
             method = self._choose_gif_method()
 
             if method == "1":  # Auto-generate clips (NEW video-first workflow)
-                self._auto_generate_clips_video_first(source_file, media_info.duration)
+                self._auto_generate_clips_enhanced(source_file, media_info.duration)
             elif method == "2":  # Manual intervals (traditional workflow)
-                self._manual_intervals_traditional(source_file, media_info.duration)
+                self._manual_intervals(source_file, media_info.duration)
             elif method == "3":  # One-click conversion
                 self._one_click_video_to_gif(source_file, media_info.duration)
 
