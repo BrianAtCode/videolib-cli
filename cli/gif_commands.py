@@ -157,6 +157,8 @@ class GifCommands:
             
             # Ask about individual thumbnail cleanup
             if create_grid:
+                grid_thumb_width, grid_thumb_height, grid_max_width, grid_max_height = self._get_grid_resolution_setting(num_clips)
+
                 print()
                 print("📂 File Management Options:")
                 print("   Individual thumbnails are used to create the grid.")
@@ -185,6 +187,9 @@ class GifCommands:
         print(f"-> Create thumbnails: {Colors.colorize('Yes' if create_thumbnails else 'No', Colors.MAGENTA)}")
         print(f"-> Create grid: {Colors.colorize('Yes' if create_grid else 'No', Colors.MAGENTA)}")
         print(f"-> Merge GIFs: {Colors.colorize('Yes' if merge_gifs else 'No', Colors.MAGENTA)}")
+        if create_grid:
+            print(f"-> Grid thumbnail size: {Colors.colorize(f'{grid_thumb_width}x{grid_thumb_height}', Colors.BLUE)}")
+            print(f"-> Grid max size: {Colors.colorize(f'{grid_max_width}x{grid_max_height}', Colors.BLUE)}")
 
         # cleanup option to confirmation display
         if create_grid:
@@ -232,7 +237,11 @@ class GifCommands:
                 merge_gifs=merge_gifs,
                 cleanup_individual_thumbs=cleanup_individual_thumbs,
                 final_gif_width=final_gif_width,    
-                final_gif_height=final_gif_height
+                final_gif_height=final_gif_height,
+                grid_thumb_width=grid_thumb_width,    
+                grid_thumb_height=grid_thumb_height, 
+                grid_max_width=grid_max_width,         
+                grid_max_height=grid_max_height 
             )
 
             self.progress.finish("GIF creation completed!")
@@ -635,12 +644,18 @@ class GifCommands:
 
         # Calculate and show final resolution
         converter = self.processor.gif_converter
+        final_width, final_height = converter._get_optimal_final_resolution(source_file, 720, 360)
+
+        #Calculate and show grid resolution
+        converter = self.processor.gif_converter
         final_width, final_height = converter._get_optimal_final_resolution(source_file, 1440, 1080)
+        grid_thumb_width, grid_thumb_height = converter._get_optimal_grid_resolution(30, 6)
         
         print(f"-> Auto Settings: {Colors.colorize(quality_desc, Colors.BLUE)}")
         print(f"-> Clip Duration: {Colors.colorize(f'{gif_duration}s', Colors.BLUE)}")
         print(f"-> Time Gap: {Colors.colorize(f'{time_gap:.1f}s', Colors.BLUE)}")
         print(f"-> Final GIF Resolution: {Colors.colorize(f'{final_width}x{final_height} (max 1440x1080)', Colors.BLUE)}")
+        print(f"-> Grid Layout: {Colors.colorize(f'6x5 grid, {grid_thumb_width}x{grid_thumb_height} per thumbnail', Colors.BLUE)}")
         print(f"-> Output Quality: {Colors.colorize('Medium (480p, 12fps)', Colors.BLUE)}")
         print()
         
@@ -673,6 +688,75 @@ class GifCommands:
         except Exception as e:
             self.progress.finish("One-click GIF creation failed!")
             self.ui.print_error(f"Error during one-click GIF creation: {e}")
+
+    def _get_grid_resolution_setting(self, num_clips: int) -> Tuple[int, int, int, int]:
+        """Get grid resolution settings from user"""
+        print()
+        self.ui.print_step("Grid Resolution Settings")
+        print(f"This controls the thumbnail grid image size ({num_clips} thumbnails)")
+        
+        # Calculate suggested grid layout
+        cols = min(6, num_clips) if num_clips <= 30 else 6
+        rows = (num_clips + cols - 1) // cols
+        
+        print(f"-> Suggested layout: {cols}x{rows} grid")
+        print()
+        print("Grid resolution presets:")
+        print("1. Small   (120x68 per thumb, ~720p total)")
+        print("2. Medium  (160x90 per thumb, ~1080p total)")
+        print("3. Large   (240x135 per thumb, ~1440p total)")
+        print("4. X-Large (320x180 per thumb, ~4K total)")
+        print("5. Custom thumbnail size")
+        print("6. Auto (optimize for layout)")
+        print()
+        
+        while True:
+            choice = self.ui.get_input("Select grid resolution (1-6)", "6")
+            
+            if choice == "1":
+                return 120, 68, 1920, 1080
+            elif choice == "2":
+                return 160, 90, 1920, 1080
+            elif choice == "3":
+                return 240, 135, 2560, 1440
+            elif choice == "4":
+                return 320, 180, 3840, 2160
+            elif choice == "5":
+                # Custom thumbnail size
+                while True:
+                    try:
+                        thumb_width = int(self.ui.get_input("Thumbnail width in pixels"))
+                        thumb_height = int(self.ui.get_input("Thumbnail height in pixels"))
+                        
+                        if thumb_width < 80 or thumb_width > 800:
+                            self.ui.print_error("Thumbnail width must be between 80 and 800 pixels")
+                            continue
+                        if thumb_height < 45 or thumb_height > 600:
+                            self.ui.print_error("Thumbnail height must be between 45 and 600 pixels")
+                            continue
+                        
+                        # Calculate total grid size
+                        total_width = cols * thumb_width
+                        total_height = rows * thumb_height + 150  # Header space
+                        
+                        print(f"-> Total grid size: {Colors.colorize(f'{total_width}x{total_height}', Colors.GREEN)}")
+                        
+                        # Set reasonable max limits based on thumbnail size
+                        max_width = max(1920, total_width + 200)
+                        max_height = max(1080, total_height + 200)
+                        
+                        return thumb_width, thumb_height, max_width, max_height
+                        
+                    except ValueError:
+                        self.ui.print_error("Please enter valid numbers")
+            elif choice == "6":
+                # Auto-optimize for layout
+                converter = self.processor.gif_converter
+                thumb_width, thumb_height = converter._get_optimal_grid_resolution(num_clips, cols)
+                print(f"-> Auto-calculated: {Colors.colorize(f'{thumb_width}x{thumb_height} per thumbnail', Colors.GREEN)}")
+                return thumb_width, thumb_height, 1920, 1080
+            else:
+                self.ui.print_error("Please enter 1, 2, 3, 4, 5, or 6")
 
     def _display_one_click_results(self, result):
         """Display one-click conversion results"""
