@@ -135,7 +135,7 @@ class ScaleEncodeCommand(CLICommands):
             self.display.display_warning(self.MESSAGES['error_interrupted'])
             return False
         except Exception as e:
-            self.display.display_error(f"Error in workflow: {e.with_traceback().format_exc()}")
+            self.display.display_error(f"Error in workflow: {e.with_traceback.format_exc()}")
             import traceback
             traceback.print_exc()
             return False
