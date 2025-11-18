@@ -120,7 +120,7 @@ def main():
     except KeyboardInterrupt:
         print("\n\n-> Goodbye!")
     except Exception as e:
-        print(f"\n! Unexpected error: {e}")
+        print(f"\n! Unexpected error: {e.with_traceback.format_exc()}")
         print("Please report this issue")
         sys.exit(1)
 

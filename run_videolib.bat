@@ -9,6 +9,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
+cd /d %~dp0
+
 REM Run the launcher
 python main.py
 pause
