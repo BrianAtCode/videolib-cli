@@ -5,7 +5,7 @@ UI utilities for CLI
 import sys
 import os
 import time
-from typing import Optional
+from typing import Optional, List, Dict
 
 class CLIFormatter:
     """CLI output formatting utilities"""
@@ -251,3 +251,253 @@ def get_input(prompt: str, default: Optional[str] = None) -> str:
         return response if response else default
     else:
         return input(f"{prompt}: ").strip()
+    
+# ============================================================================
+# Scale & Encode UI Components (Add to end of ui.py)
+# ============================================================================
+
+class MenuHandler:
+    """Reusable menu selection handler for CLI"""
+    
+    def __init__(self, ui_helper: UIHelper = None):
+        """
+        Initialize MenuHandler.
+        
+        Args:
+            ui_helper: Optional UIHelper instance
+        """
+        self.ui_helper = ui_helper or UIHelper()
+    
+    def display_options(self, options: List[str], title: str = None) -> None:
+        """
+        Display menu options.
+        
+        Args:
+            options: List of option strings
+            title: Optional title to display before options
+        """
+        if title:
+            self.ui_helper.print_step(title)
+        
+        for option in options:
+            print(option)
+    
+    def get_selection(self, prompt: str, max_option: int, allow_custom: bool = False) -> str:
+        """
+        Get user menu selection.
+        
+        Args:
+            prompt: Prompt text
+            max_option: Maximum option number
+            allow_custom: If True, allow entering custom value
+        
+        Returns:
+            User selection as string
+        """
+        while True:
+            try:
+                choice = input(f"\n> {prompt}: ").strip()
+                
+                if choice.isdigit():
+                    if 1 <= int(choice) <= max_option:
+                        return choice
+                    elif allow_custom and int(choice) == max_option + 1:
+                        return choice
+                
+                print(f"X Invalid selection. Please enter 1-{max_option}")
+            except KeyboardInterrupt:
+                raise
+            except Exception as e:
+                print(f"X Error: {e}")
+
+
+class InputHandler:
+    """Reusable user input handler for CLI"""
+    
+    def __init__(self, ui_helper: UIHelper = None):
+        """
+        Initialize InputHandler.
+        
+        Args:
+            ui_helper: Optional UIHelper instance
+        """
+        self.ui_helper = ui_helper or UIHelper()
+    
+    def get_file_path(self, prompt: str = "Enter file path", must_exist: bool = True) -> Optional[str]:
+        """
+        Get file path from user.
+        
+        Args:
+            prompt: Prompt text
+            must_exist: If True, file must exist
+        
+        Returns:
+            File path or None if cancelled
+        """
+        while True:
+            try:
+                file_path = input(f"> {prompt}: ").strip()
+                
+                if not file_path:
+                    print("X File path cannot be empty")
+                    continue
+                
+                if must_exist and not os.path.exists(file_path):
+                    print(f"X File not found: {file_path}")
+                    retry = input("? Try again? [Y/n]: ").strip().lower()
+                    if retry != 'n':
+                        continue
+                    return None
+                
+                return file_path
+            except KeyboardInterrupt:
+                raise
+            except Exception as e:
+                print(f"X Error: {e}")
+    
+    def get_integer(self, prompt: str, min_val: int = None, max_val: int = None) -> Optional[int]:
+        """
+        Get integer input from user.
+        
+        Args:
+            prompt: Prompt text
+            min_val: Minimum allowed value
+            max_val: Maximum allowed value
+        
+        Returns:
+            Integer value or None if invalid
+        """
+        while True:
+            try:
+                value = int(input(f"> {prompt}: ").strip())
+                
+                if min_val is not None and value < min_val:
+                    print(f"X Value must be >= {min_val}")
+                    continue
+                
+                if max_val is not None and value > max_val:
+                    print(f"X Value must be <= {max_val}")
+                    continue
+                
+                return value
+            except ValueError:
+                print("X Please enter a valid integer")
+            except KeyboardInterrupt:
+                raise
+            except Exception as e:
+                print(f"X Error: {e}")
+    
+    def get_string(self, prompt: str, default: str = None, required: bool = True) -> Optional[str]:
+        """
+        Get string input from user.
+        
+        Args:
+            prompt: Prompt text
+            default: Default value if user enters nothing
+            required: If True, cannot be empty
+        
+        Returns:
+            String value or None
+        """
+        try:
+            if default:
+                response = input(f"> {prompt} [{default}]: ").strip()
+                return response if response else default
+            else:
+                while True:
+                    response = input(f"> {prompt}: ").strip()
+                    if response or not required:
+                        return response
+                    print("X Input cannot be empty")
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            print(f"X Error: {e}")
+    
+    def get_confirmation(self, prompt: str, default: bool = True) -> bool:
+        """
+        Get yes/no confirmation from user.
+        
+        Args:
+            prompt: Prompt text
+            default: Default value
+        
+        Returns:
+            True for yes, False for no
+        """
+        suffix = "[Y/n]" if default else "[y/N]"
+        response = input(f"? {prompt} {suffix}: ").strip().lower()
+        
+        if not response:
+            return default
+        
+        return response in ['y', 'yes', '1', 'true']
+
+
+class DisplayHandler:
+    """Reusable display handler for CLI output"""
+    
+    def __init__(self, ui_helper: UIHelper = None):
+        """
+        Initialize DisplayHandler.
+        
+        Args:
+            ui_helper: Optional UIHelper instance
+        """
+        self.ui_helper = ui_helper or UIHelper()
+    
+    def display_section(self, title: str) -> None:
+        """Display section header"""
+        self.ui_helper.print_header(title)
+    
+    def display_step(self, step_text: str) -> None:
+        """Display step header"""
+        self.ui_helper.print_step(step_text)
+    
+    def display_list(self, items: List[str], title: str = None) -> None:
+        """
+        Display list of items.
+        
+        Args:
+            items: List of strings to display
+            title: Optional title
+        """
+        if title:
+            self.display_step(title)
+        
+        for item in items:
+            print(item)
+    
+    def display_key_value(self, data: Dict[str, str], title: str = None) -> None:
+        """
+        Display key-value pairs.
+        
+        Args:
+            data: Dictionary of key-value pairs
+            title: Optional title
+        """
+        if title:
+            self.display_step(title)
+        
+        for key, value in data.items():
+            print(f"  {key}: {value}")
+    
+    def display_success(self, message: str) -> None:
+        """Display success message"""
+        self.ui_helper.print_success(message)
+    
+    def display_error(self, message: str) -> None:
+        """Display error message"""
+        self.ui_helper.print_error(message)
+    
+    def display_warning(self, message: str) -> None:
+        """Display warning message"""
+        self.ui_helper.print_warning(message)
+    
+    def display_info(self, message: str) -> None:
+        """Display info message"""
+        self.ui_helper.print_info(message)
+    
+    def display_divider(self, char: str = "-", length: int = 50) -> None:
+        """Display divider line"""
+        self.ui_helper.print_divider(char, length)
