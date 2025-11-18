@@ -10,8 +10,11 @@ import time
 import subprocess
 import select
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 from .gif_commands import GifCommands
+from .scale_encode_command import ScaleEncodeCommand
+from .ui import CLIFormatter
+
 # Import the video processing library
 try:
     import videolib
@@ -286,9 +289,10 @@ class InteractiveCLI:
         print("2. Split Video by Size") 
         print("3. Create Video Clips")
         print("4. Create Animated GIFs")
-        print("5. Get Media Information")
-        print("6. Batch Process from Config File")
-        print("7. Settings")
+        print("5. Scale & Encode Video")
+        print("6. Get Media Information")
+        print("7. Batch Process from Config File")
+        print("8. Settings")
         print("0. Exit")
         print("=" * 50)
         print("Tip: During operations, press 'q' to cancel and return to menu")
@@ -1008,6 +1012,30 @@ class InteractiveCLI:
             self.keyboard_listener.stop_listening()
             self.pause_for_user()
     
+    def create_scale_encode_interactive(self):
+        """Handle Scale & Encode option from main menu"""
+        try:
+            # Create command instance with dependencies
+            command = ScaleEncodeCommand(
+                self.processor,
+                self.keyboard_listener,
+                self.progress_tracker
+            )
+            
+            # Execute workflow
+            success = command.execute_workflow()
+            
+            if success:
+                CLIFormatter.success("Scale & Encode completed successfully")
+            
+        except Exception as e:
+            CLIFormatter.error(f"Error in scale & encode: {e}")
+            import traceback
+            traceback.print_exc()
+        finally:
+            self.pause_for_user()
+
+
     def get_media_info_interactive(self):
         """Interactive media info workflow with 'q' interrupt support"""
         print("\n" + "-" * 50)
@@ -1303,10 +1331,12 @@ class InteractiveCLI:
                     elif choice == '4':
                         self.gif_commands.create_gif_clips_interactive()
                     elif choice == '5':
-                        self.get_media_info_interactive()
+                        self.create_scale_encode_interactive()
                     elif choice == '6':
-                        self.batch_process_interactive()
+                        self.get_media_info_interactive()
                     elif choice == '7':
+                        self.batch_process_interactive()
+                    elif choice == '8':
                         self.settings_menu()
                     else:
                         print("X Invalid option. Please try again.")
